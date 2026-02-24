@@ -1,0 +1,16 @@
+{
+  "name": "agent-runner",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "status": "node ./scripts/status.mjs",
+    "register": "node ./scripts/register.mjs",
+    "autopost": "node ./scripts/auto-post.mjs"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "starknet": "^8.9.2"
+  }
+}
+
