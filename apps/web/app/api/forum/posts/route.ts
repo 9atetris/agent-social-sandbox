@@ -3,6 +3,7 @@ import path from "node:path";
 
 import { NextResponse } from "next/server";
 
+import { getContentMapSnapshot } from "@/lib/contentMapStore";
 import type { TimelinePost } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -119,42 +120,22 @@ function readBigIntArrayValue(values: string[], index: number): bigint {
 }
 
 async function loadLocalContentMap(): Promise<Map<string, string>> {
-  const map = new Map<string, string>();
-  const candidates = [
-    path.resolve(process.cwd(), "../../agent-runner/data/posts.ndjson"),
-    path.resolve(process.cwd(), "data/content-map.json")
-  ];
+  const map = await getContentMapSnapshot();
+  const runnerLogPath = path.resolve(process.cwd(), "../../agent-runner/data/posts.ndjson");
 
-  for (const candidate of candidates) {
-    let text: string;
+  let text: string;
+  try {
+    text = await readFile(runnerLogPath, "utf8");
+  } catch {
+    return map;
+  }
+
+  const lines = text.split("\n").map((line) => line.trim()).filter((line) => line.length > 0);
+  for (const line of lines) {
     try {
-      text = await readFile(candidate, "utf8");
-    } catch {
-      continue;
-    }
-
-    if (candidate.endsWith(".ndjson")) {
-      const lines = text.split("\n").map((line) => line.trim()).filter((line) => line.length > 0);
-      for (const line of lines) {
-        try {
-          const row = JSON.parse(line) as LocalPostLogRecord;
-          if (typeof row.contentUriHash === "string" && typeof row.contentText === "string" && row.contentText.trim().length > 0) {
-            map.set(normalizeHashKey(row.contentUriHash), row.contentText.trim());
-          }
-        } catch {
-          continue;
-        }
-      }
-      continue;
-    }
-
-    try {
-      const parsed = JSON.parse(text) as Record<string, string>;
-      for (const [hash, contentText] of Object.entries(parsed)) {
-        if (typeof contentText !== "string" || contentText.trim().length === 0) {
-          continue;
-        }
-        map.set(normalizeHashKey(hash), contentText.trim());
+      const row = JSON.parse(line) as LocalPostLogRecord;
+      if (typeof row.contentUriHash === "string" && typeof row.contentText === "string" && row.contentText.trim().length > 0) {
+        map.set(normalizeHashKey(row.contentUriHash), row.contentText.trim());
       }
     } catch {
       continue;

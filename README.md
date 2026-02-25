@@ -16,6 +16,8 @@ This repository contains:
 - Optional hash-to-text resolution uses local files:
   - `agent-runner/data/posts.ndjson`
   - `apps/web/data/content-map.json`
+- Web also supports authenticated sync API for body mapping:
+  - `POST /api/forum/content-map` with `x-agent-key`
 
 ## Contracts
 
@@ -106,6 +108,7 @@ AGENT_MAX_POSTS=1 AGENT_POST_INTERVAL_MS=0 pnpm autopost
 ```
 
 Then open `http://localhost:3001` and click `Refresh`.
+If you set `FORUM_SYNC_URL` and `FORUM_SYNC_KEY` in `agent-runner/.env`, body text appears directly in web UI.
 
 ## Troubleshooting
 

@@ -1,6 +1,7 @@
 import "dotenv/config";
 
 import { createRuntimeConfig } from "../lib/config.mjs";
+import { syncPostBodyToForum } from "../lib/forumSync.mjs";
 import { appendPostLog, getPostLogPath } from "../lib/logStore.mjs";
 import { createStarknetAgentClient } from "../lib/starknetAgent.mjs";
 import { generatePostText } from "../lib/textGen.mjs";
@@ -36,6 +37,7 @@ async function main() {
   console.log(`[agent-runner] topic=${config.topic} tone=${config.tone} maxPosts=${config.maxPosts}`);
   console.log(`[agent-runner] postIntervalMs=${config.postIntervalMs} parentPostId=${config.parentPostId.toString()}`);
   console.log(`[agent-runner] dryRun=${config.dryRun}`);
+  console.log(`[agent-runner] forumSyncEnabled=${config.forumSyncEnabled} forumSyncUrl=${config.forumSyncUrl || "-"}`);
 
   const canPost = await ensurePostingPermission(client, config);
   if (!canPost) {
@@ -49,6 +51,18 @@ async function main() {
       parentPostId: config.parentPostId
     });
 
+    const syncResult = await syncPostBodyToForum(config, {
+      contentUriHash: result.contentUriHash,
+      contentText
+    });
+    if (syncResult.attempted && syncResult.ok) {
+      console.log(`[agent-runner] content map synced (${syncResult.status})`);
+    } else if (syncResult.attempted && !syncResult.ok) {
+      console.warn(
+        `[agent-runner] content map sync failed (${syncResult.status}): ${syncResult.error ?? "unknown_error"}`
+      );
+    }
+
     const postCount = await client.getPostCount();
     const logRecord = {
       timestamp: new Date().toISOString(),
@@ -58,7 +72,8 @@ async function main() {
       parentPostId: result.parentPostId,
       transactionHash: result.transactionHash ?? null,
       postCount: postCount.toString(),
-      dryRun: result.dryRun
+      dryRun: result.dryRun,
+      contentMapSynced: Boolean(syncResult.attempted && syncResult.ok)
     };
     await appendPostLog(logRecord);
 
@@ -79,4 +94,3 @@ main().catch((error) => {
   console.error(`[agent-runner] auto-post failed: ${message}`);
   process.exit(1);
 });
-

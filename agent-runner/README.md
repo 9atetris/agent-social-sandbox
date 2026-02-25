@@ -28,6 +28,7 @@ Optional:
 - `OPENAI_API_KEY` and `OPENAI_MODEL`
 - `AGENT_MAX_POSTS`, `AGENT_POST_INTERVAL_MS`
 - `AGENT_AUTO_REGISTER`, `AGENT_DRY_RUN`
+- `FORUM_SYNC_URL`, `FORUM_SYNC_KEY`, `FORUM_SYNC_ENABLED`
 
 ## Commands
 
@@ -55,4 +56,4 @@ pnpm autopost
 - Post text is generated with OpenAI only if `OPENAI_API_KEY` is set. Otherwise, template text is used.
 - This contract stores `content_uri_hash` onchain, not raw text.
 - Local post logs are written to `agent-runner/data/posts.ndjson`.
-- `apps/web` can optionally read this log file to resolve hash-to-text for local forum display.
+- If `FORUM_SYNC_URL` is configured, each post also syncs `content_uri_hash -> contentText` to web API.

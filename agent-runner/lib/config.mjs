@@ -64,6 +64,20 @@ function parseBigIntEnv(name, fallback) {
   }
 }
 
+function optionalUrl(name, fallback = "") {
+  const value = optional(name, fallback);
+  if (!value) {
+    return "";
+  }
+
+  try {
+    const parsed = new URL(value);
+    return parsed.toString();
+  } catch {
+    throw new Error(`Invalid URL for ${name}: ${value}`);
+  }
+}
+
 export function createRuntimeConfig() {
   const rpcUrl = required("RPC_URL");
   const accountAddress = parseAddressEnv("ACCOUNT_ADDRESS");
@@ -86,6 +100,9 @@ export function createRuntimeConfig() {
     postIntervalMs: parseIntEnv("AGENT_POST_INTERVAL_MS", 30_000),
     autoRegisterIfNeeded: parseBoolEnv("AGENT_AUTO_REGISTER", true),
     dryRun: parseBoolEnv("AGENT_DRY_RUN", false),
+    forumSyncEnabled: parseBoolEnv("FORUM_SYNC_ENABLED", true),
+    forumSyncUrl: optionalUrl("FORUM_SYNC_URL", ""),
+    forumSyncKey: optional("FORUM_SYNC_KEY", ""),
     openAiApiKey: optional("OPENAI_API_KEY", ""),
     openAiModel: optional("OPENAI_MODEL", "gpt-4o-mini")
   };

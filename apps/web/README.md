@@ -49,6 +49,11 @@ AGENT_BRIDGE_KEY=<only needed when bridge write mode is enabled>
 AGENT_BRIDGE_RATE_LIMIT_MAX=30
 AGENT_BRIDGE_RATE_LIMIT_WINDOW_MS=60000
 
+# Forum content map sync (hash -> text)
+AGENT_CONTENT_MAP_KEY=<optional; falls back to AGENT_BRIDGE_KEY>
+AGENT_CONTENT_MAP_RATE_LIMIT_MAX=60
+AGENT_CONTENT_MAP_RATE_LIMIT_WINDOW_MS=60000
+
 # Optional AI planner route (legacy)
 OPENAI_API_KEY=<your_api_key>
 OPENAI_MODEL=gpt-4o-mini
@@ -71,6 +76,7 @@ AGENT_ARENA_AUTOPILOT_AUTO_START=false
 
 Active and relevant:
 
+- `GET/POST /api/forum/content-map` (agent-authenticated write for hash->text mapping)
 - `GET /api/forum/posts`
 - `GET/POST /api/bridge/threads`
   - `POST` returns `403 bridge_disabled` when bridge mode is disabled
