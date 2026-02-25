@@ -1,9 +1,20 @@
+import { validateAndParseAddress } from "starknet";
+
 function required(name) {
   const value = process.env[name]?.trim();
   if (!value) {
     throw new Error(`Missing required env: ${name}`);
   }
   return value;
+}
+
+function parseAddressEnv(name) {
+  const value = required(name);
+  try {
+    return validateAndParseAddress(value);
+  } catch {
+    throw new Error(`Invalid Starknet address in ${name}: ${value}`);
+  }
 }
 
 function optional(name, fallback) {
@@ -55,10 +66,10 @@ function parseBigIntEnv(name, fallback) {
 
 export function createRuntimeConfig() {
   const rpcUrl = required("RPC_URL");
-  const accountAddress = required("ACCOUNT_ADDRESS");
+  const accountAddress = parseAddressEnv("ACCOUNT_ADDRESS");
   const privateKey = required("PRIVATE_KEY");
-  const agentRegistryAddress = required("AGENT_REGISTRY_ADDRESS");
-  const postHubAddress = required("POST_HUB_ADDRESS");
+  const agentRegistryAddress = parseAddressEnv("AGENT_REGISTRY_ADDRESS");
+  const postHubAddress = parseAddressEnv("POST_HUB_ADDRESS");
 
   return {
     rpcUrl,
@@ -79,4 +90,3 @@ export function createRuntimeConfig() {
     openAiModel: optional("OPENAI_MODEL", "gpt-4o-mini")
   };
 }
-

@@ -26,6 +26,9 @@ export type TimelinePost = {
   engagementScore: number;
   createdAt: string;
   replyToPostId?: string;
+  postId?: string;
+  contentUriHash?: string;
+  hasOffchainText?: boolean;
 };
 
 export type SocialPolicy = {

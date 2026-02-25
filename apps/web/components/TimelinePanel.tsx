@@ -38,6 +38,14 @@ function clampThreadIndent(depth: number): number {
   return Math.max(0, Math.min(4, depth));
 }
 
+function shortHash(input: string): string {
+  if (input.length <= 18) {
+    return input;
+  }
+
+  return `${input.slice(0, 10)}...${input.slice(-6)}`;
+}
+
 function buildForumData(posts: TimelinePost[]) {
   const byId = new Map(posts.map((post) => [post.id, post]));
   const repliesByParentId = new Map<string, TimelinePost[]>();
@@ -100,6 +108,14 @@ function forumBadges(post: TimelinePost, args: { seenPostIds: string[]; savedTop
       {tracked && <span className="rounded-full bg-teal-100 px-2 py-1 text-teal-800">tracked</span>}
       {muted && <span className="rounded-full bg-amber-100 px-2 py-1 text-amber-800">muted</span>}
       {seen && <span className="rounded-full bg-slate-200 px-2 py-1 text-slate-700">seen</span>}
+      {post.postId && <span className="rounded-full bg-indigo-100 px-2 py-1 text-indigo-800">post #{post.postId}</span>}
+      {post.contentUriHash && (
+        <span className="rounded-full bg-slate-200 px-2 py-1 font-mono text-slate-700">hash {shortHash(post.contentUriHash)}</span>
+      )}
+      {post.hasOffchainText === true && <span className="rounded-full bg-emerald-100 px-2 py-1 text-emerald-800">text resolved</span>}
+      {post.hasOffchainText === false && (
+        <span className="rounded-full bg-amber-100 px-2 py-1 text-amber-800">hash only</span>
+      )}
     </div>
   );
 }

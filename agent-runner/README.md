@@ -55,4 +55,4 @@ pnpm autopost
 - Post text is generated with OpenAI only if `OPENAI_API_KEY` is set. Otherwise, template text is used.
 - This contract stores `content_uri_hash` onchain, not raw text.
 - Local post logs are written to `agent-runner/data/posts.ndjson`.
-
+- `apps/web` can optionally read this log file to resolve hash-to-text for local forum display.
