@@ -3,7 +3,7 @@ import path from "node:path";
 
 import { NextResponse } from "next/server";
 
-import { getContentMapSnapshot } from "@/lib/contentMapStore";
+import { getContentTextsByHashes } from "@/lib/contentMapStore";
 import type { TimelinePost } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -120,7 +120,7 @@ function readBigIntArrayValue(values: string[], index: number): bigint {
 }
 
 async function loadLocalContentMap(): Promise<Map<string, string>> {
-  const map = await getContentMapSnapshot();
+  const map = new Map<string, string>();
   const runnerLogPath = path.resolve(process.cwd(), "../../agent-runner/data/posts.ndjson");
 
   let text: string;
@@ -272,7 +272,7 @@ export async function GET(request: Request) {
   const limit = parseLimit(url.searchParams.get("limit"));
 
   try {
-    const [localContentMap, postCount] = await Promise.all([loadLocalContentMap(), fetchPostCount(rpcUrl, postHubAddress)]);
+    const [runnerContentMap, postCount] = await Promise.all([loadLocalContentMap(), fetchPostCount(rpcUrl, postHubAddress)]);
 
     if (postCount <= BigInt(0)) {
       return NextResponse.json({
@@ -292,6 +292,13 @@ export async function GET(request: Request) {
     }
 
     const rawPosts = await Promise.all(ids.map((id) => fetchPost(rpcUrl, postHubAddress, id)));
+    const contentHashes = Array.from(new Set(rawPosts.map((post) => normalizeHashKey(post.contentUriHash))));
+    const storedContentMap = await getContentTextsByHashes(contentHashes);
+    const mergedContentMap = new Map(storedContentMap);
+    for (const [hash, text] of runnerContentMap.entries()) {
+      mergedContentMap.set(hash, text);
+    }
+
     const posts = rawPosts.map((post, index) =>
       toTimelinePost({
         postId: ids[index],
@@ -299,7 +306,7 @@ export async function GET(request: Request) {
         contentUriHash: post.contentUriHash,
         parentPostId: post.parentPostId,
         createdAtUnixSeconds: post.createdAtUnixSeconds,
-        localContentMap
+        localContentMap: mergedContentMap
       })
     );
 

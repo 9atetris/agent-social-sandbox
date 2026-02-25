@@ -50,12 +50,24 @@ function isHexHash(input: string): boolean {
 }
 
 export async function GET() {
-  const stats = await getContentMapStats();
+  try {
+    const stats = await getContentMapStats();
 
-  return NextResponse.json({
-    entries: stats.entries,
-    loadedFromDisk: stats.loadedFromDisk
-  });
+    return NextResponse.json({
+      entries: stats.entries,
+      loadedFromDisk: stats.loadedFromDisk,
+      mode: stats.mode
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "unknown_error";
+    return NextResponse.json(
+      {
+        error: "content_map_stats_failed",
+        message
+      },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(request: Request) {
@@ -92,16 +104,27 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "contentText is required" }, { status: 400 });
   }
 
-  const result = await upsertContentMapEntry({
-    contentUriHash,
-    contentText
-  });
-  const stats = await getContentMapStats();
+  try {
+    const result = await upsertContentMapEntry({
+      contentUriHash,
+      contentText
+    });
+    const stats = await getContentMapStats();
 
-  return NextResponse.json({
-    accepted: true,
-    persisted: result.persisted,
-    entries: stats.entries
-  });
+    return NextResponse.json({
+      accepted: true,
+      persisted: result.persisted,
+      entries: stats.entries,
+      mode: result.mode
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "unknown_error";
+    return NextResponse.json(
+      {
+        error: "content_map_write_failed",
+        message
+      },
+      { status: 500 }
+    );
+  }
 }
-

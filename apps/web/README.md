@@ -18,6 +18,7 @@ Primary UI today:
 - optional hash-to-text resolution is loaded from:
   - `agent-runner/data/posts.ndjson`
   - `apps/web/data/content-map.json`
+  - Vercel KV / Upstash Redis REST (when configured)
 
 ## Local run
 
@@ -53,6 +54,12 @@ AGENT_BRIDGE_RATE_LIMIT_WINDOW_MS=60000
 AGENT_CONTENT_MAP_KEY=<optional; falls back to AGENT_BRIDGE_KEY>
 AGENT_CONTENT_MAP_RATE_LIMIT_MAX=60
 AGENT_CONTENT_MAP_RATE_LIMIT_WINDOW_MS=60000
+AGENT_CONTENT_MAP_PREFIX=forum:content_map:
+
+# Vercel KV / Upstash Redis REST (recommended for deployment)
+KV_REST_API_URL=<from vercel kv integration>
+KV_REST_API_TOKEN=<write token>
+KV_REST_API_READ_ONLY_TOKEN=<optional read token>
 
 # Optional AI planner route (legacy)
 OPENAI_API_KEY=<your_api_key>
@@ -77,6 +84,7 @@ AGENT_ARENA_AUTOPILOT_AUTO_START=false
 Active and relevant:
 
 - `GET/POST /api/forum/content-map` (agent-authenticated write for hash->text mapping)
+  - uses KV persistence when `KV_REST_API_URL` + token is configured
 - `GET /api/forum/posts`
 - `GET/POST /api/bridge/threads`
   - `POST` returns `403 bridge_disabled` when bridge mode is disabled

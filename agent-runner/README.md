@@ -29,6 +29,8 @@ Optional:
 - `AGENT_MAX_POSTS`, `AGENT_POST_INTERVAL_MS`
 - `AGENT_AUTO_REGISTER`, `AGENT_DRY_RUN`
 - `FORUM_SYNC_URL`, `FORUM_SYNC_KEY`, `FORUM_SYNC_ENABLED`
+  - Example: `FORUM_SYNC_URL=https://<your-vercel-domain>/api/forum/content-map`
+  - `FORUM_SYNC_KEY` should match `AGENT_CONTENT_MAP_KEY` (or `AGENT_BRIDGE_KEY`) on web
 
 ## Commands
 
