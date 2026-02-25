@@ -2,7 +2,6 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 
 import { NextResponse } from "next/server";
-import { RpcProvider, num, validateAndParseAddress } from "starknet";
 
 import type { TimelinePost } from "@/lib/types";
 
@@ -11,6 +10,8 @@ export const dynamic = "force-dynamic";
 
 const DEFAULT_LIMIT = 80;
 const MAX_LIMIT = 300;
+const ENTRYPOINT_SELECTOR_POST_COUNT = "0x10b282a55c555c7ac392567f3ecd9214fc52f47150bc304011c8517743f0104";
+const ENTRYPOINT_SELECTOR_GET_POST = "0x28beeeff0981aa3f68765d8ffd49a37cd542dda0e4524780b4f20f7fef93f1e";
 
 type LocalPostLogRecord = {
   contentUriHash?: string;
@@ -97,11 +98,16 @@ function resolvePostHubAddress(): string | undefined {
     return undefined;
   }
 
-  try {
-    return validateAndParseAddress(raw);
-  } catch {
+  if (!raw.startsWith("0x") || raw.length < 4) {
     return undefined;
   }
+
+  const isHex = /^[0-9a-fA-Fx]+$/.test(raw);
+  if (!isHex) {
+    return undefined;
+  }
+
+  return raw;
 }
 
 function readFeltArrayValue(values: string[], index: number): string {
@@ -115,7 +121,7 @@ function readBigIntArrayValue(values: string[], index: number): bigint {
 async function loadLocalContentMap(): Promise<Map<string, string>> {
   const map = new Map<string, string>();
   const candidates = [
-    path.resolve(process.cwd(), "../agent-runner/data/posts.ndjson"),
+    path.resolve(process.cwd(), "../../agent-runner/data/posts.ndjson"),
     path.resolve(process.cwd(), "data/content-map.json")
   ];
 
@@ -158,26 +164,82 @@ async function loadLocalContentMap(): Promise<Map<string, string>> {
   return map;
 }
 
-async function fetchPostCount(provider: RpcProvider, postHubAddress: string): Promise<bigint> {
-  const values = await provider.callContract({
+function hexFromBigInt(value: bigint): string {
+  const normalized = value >= BigInt(0) ? value : BigInt(0);
+  return `0x${normalized.toString(16)}`;
+}
+
+async function rpcCall(rpcUrl: string, params: { contractAddress: string; selector: string; calldata: string[] }) {
+  const response = await fetch(rpcUrl, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: Date.now(),
+      method: "starknet_call",
+      params: {
+        request: {
+          contract_address: params.contractAddress,
+          entry_point_selector: params.selector,
+          calldata: params.calldata
+        },
+        block_id: "latest"
+      }
+    }),
+    cache: "no-store"
+  });
+
+  const text = await response.text();
+  let payload: unknown;
+  try {
+    payload = JSON.parse(text);
+  } catch {
+    throw new Error(`rpc_invalid_json_response (${response.status}): ${text.slice(0, 160)}`);
+  }
+
+  if (!response.ok) {
+    throw new Error(`rpc_http_error_${response.status}: ${JSON.stringify(payload).slice(0, 240)}`);
+  }
+
+  if (!payload || typeof payload !== "object") {
+    throw new Error("rpc_invalid_payload");
+  }
+
+  const asRecord = payload as Record<string, unknown>;
+  if ("error" in asRecord) {
+    throw new Error(`rpc_call_error: ${JSON.stringify(asRecord.error).slice(0, 240)}`);
+  }
+
+  const result = asRecord.result;
+  if (!Array.isArray(result)) {
+    throw new Error(`rpc_invalid_result: ${JSON.stringify(result).slice(0, 240)}`);
+  }
+
+  return result.map((item) => String(item));
+}
+
+async function fetchPostCount(rpcUrl: string, postHubAddress: string): Promise<bigint> {
+  const values = await rpcCall(rpcUrl, {
     contractAddress: postHubAddress,
-    entrypoint: "post_count",
+    selector: ENTRYPOINT_SELECTOR_POST_COUNT,
     calldata: []
   });
 
   return readBigIntArrayValue(values, 0);
 }
 
-async function fetchPost(provider: RpcProvider, postHubAddress: string, postId: bigint): Promise<{
+async function fetchPost(rpcUrl: string, postHubAddress: string, postId: bigint): Promise<{
   author: string;
   contentUriHash: string;
   parentPostId: bigint;
   createdAtUnixSeconds: bigint;
 }> {
-  const values = await provider.callContract({
+  const values = await rpcCall(rpcUrl, {
     contractAddress: postHubAddress,
-    entrypoint: "get_post",
-    calldata: [num.toHex(postId)]
+    selector: ENTRYPOINT_SELECTOR_GET_POST,
+    calldata: [hexFromBigInt(postId)]
   });
 
   return {
@@ -227,10 +289,9 @@ export async function GET(request: Request) {
 
   const url = new URL(request.url);
   const limit = parseLimit(url.searchParams.get("limit"));
-  const provider = new RpcProvider({ nodeUrl: rpcUrl });
 
   try {
-    const [localContentMap, postCount] = await Promise.all([loadLocalContentMap(), fetchPostCount(provider, postHubAddress)]);
+    const [localContentMap, postCount] = await Promise.all([loadLocalContentMap(), fetchPostCount(rpcUrl, postHubAddress)]);
 
     if (postCount <= BigInt(0)) {
       return NextResponse.json({
@@ -249,7 +310,7 @@ export async function GET(request: Request) {
       ids.push(id);
     }
 
-    const rawPosts = await Promise.all(ids.map((id) => fetchPost(provider, postHubAddress, id)));
+    const rawPosts = await Promise.all(ids.map((id) => fetchPost(rpcUrl, postHubAddress, id)));
     const posts = rawPosts.map((post, index) =>
       toTimelinePost({
         postId: ids[index],
