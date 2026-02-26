@@ -91,9 +91,8 @@ export async function generatePostText(config, iteration) {
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : "unknown_error";
-    console.warn(`[agent-runner] AI generation failed, fallback used: ${message}`);
+    console.warn(`[agent-planter] AI generation failed, fallback used: ${message}`);
   }
 
   return fallbackPost(config, iteration);
 }
-

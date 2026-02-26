@@ -20,10 +20,10 @@ async function ensurePostingPermission(client, config) {
     return false;
   }
 
-  console.log("[agent-runner] can_post=false. registering automatically...");
+  console.log("[agent-planter] can_post=false. registering automatically...");
   const result = await client.register(config.profileUri);
   if (!result.dryRun) {
-    console.log(`[agent-runner] register tx: ${result.transactionHash}`);
+    console.log(`[agent-planter] register tx: ${result.transactionHash}`);
   }
 
   return client.canPost();
@@ -33,11 +33,11 @@ async function main() {
   const config = createRuntimeConfig();
   const client = createStarknetAgentClient(config);
 
-  console.log(`[agent-runner] account: ${config.accountAddress}`);
-  console.log(`[agent-runner] topic=${config.topic} tone=${config.tone} maxPosts=${config.maxPosts}`);
-  console.log(`[agent-runner] postIntervalMs=${config.postIntervalMs} parentPostId=${config.parentPostId.toString()}`);
-  console.log(`[agent-runner] dryRun=${config.dryRun}`);
-  console.log(`[agent-runner] forumSyncEnabled=${config.forumSyncEnabled} forumSyncUrl=${config.forumSyncUrl || "-"}`);
+  console.log(`[agent-planter] account: ${config.accountAddress}`);
+  console.log(`[agent-planter] topic=${config.topic} tone=${config.tone} maxPosts=${config.maxPosts}`);
+  console.log(`[agent-planter] postIntervalMs=${config.postIntervalMs} parentPostId=${config.parentPostId.toString()}`);
+  console.log(`[agent-planter] dryRun=${config.dryRun}`);
+  console.log(`[agent-planter] forumSyncEnabled=${config.forumSyncEnabled} forumSyncUrl=${config.forumSyncUrl || "-"}`);
 
   const canPost = await ensurePostingPermission(client, config);
   if (!canPost) {
@@ -57,10 +57,10 @@ async function main() {
       contentText
     });
     if (syncResult.attempted && syncResult.ok) {
-      console.log(`[agent-runner] content map synced (${syncResult.status})`);
+      console.log(`[agent-planter] content map synced (${syncResult.status})`);
     } else if (syncResult.attempted && !syncResult.ok) {
       console.warn(
-        `[agent-runner] content map sync failed (${syncResult.status}): ${syncResult.error ?? "unknown_error"}`
+        `[agent-planter] content map sync failed (${syncResult.status}): ${syncResult.error ?? "unknown_error"}`
       );
     }
 
@@ -79,7 +79,7 @@ async function main() {
     await appendPostLog(logRecord);
 
     console.log(
-      `[agent-runner] [${i}/${config.maxPosts}] post_hash=${result.contentUriHash} tx=${result.transactionHash ?? "dry-run"}`
+      `[agent-planter] [${i}/${config.maxPosts}] post_hash=${result.contentUriHash} tx=${result.transactionHash ?? "dry-run"}`
     );
 
     if (i < config.maxPosts && config.postIntervalMs > 0) {
@@ -87,11 +87,11 @@ async function main() {
     }
   }
 
-  console.log(`[agent-runner] done. log file: ${getPostLogPath()}`);
+  console.log(`[agent-planter] done. log file: ${getPostLogPath()}`);
 }
 
 main().catch((error) => {
   const message = error instanceof Error ? error.message : "unknown_error";
-  console.error(`[agent-runner] auto-post failed: ${message}`);
+  console.error(`[agent-planter] auto-post failed: ${message}`);
   process.exit(1);
 });

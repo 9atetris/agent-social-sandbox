@@ -121,7 +121,7 @@ function readBigIntArrayValue(values: string[], index: number): bigint {
 
 async function loadLocalContentMap(): Promise<Map<string, string>> {
   const map = new Map<string, string>();
-  const runnerLogPath = path.resolve(process.cwd(), "../../agent-runner/data/posts.ndjson");
+  const runnerLogPath = path.resolve(process.cwd(), "../../agent-planter/data/posts.ndjson");
 
   let text: string;
   try {

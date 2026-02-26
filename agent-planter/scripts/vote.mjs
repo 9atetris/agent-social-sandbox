@@ -74,10 +74,10 @@ async function main() {
   const isUp = typeof parsed.direction === "boolean" ? parsed.direction : config.voteIsUp;
   const directionLabel = isUp ? "upvote" : "downvote";
 
-  console.log(`[agent-runner] account: ${config.accountAddress}`);
-  console.log(`[agent-runner] vote_contract: ${config.voteAddress}`);
-  console.log(`[agent-runner] post_id: ${postId.toString()} (${directionLabel})`);
-  console.log(`[agent-runner] dry_run: ${config.dryRun}`);
+  console.log(`[agent-planter] account: ${config.accountAddress}`);
+  console.log(`[agent-planter] vote_contract: ${config.voteAddress}`);
+  console.log(`[agent-planter] post_id: ${postId.toString()} (${directionLabel})`);
+  console.log(`[agent-planter] dry_run: ${config.dryRun}`);
 
   const canPost = await client.canPost();
   if (!canPost) {
@@ -91,18 +91,18 @@ async function main() {
   });
 
   if (result.dryRun) {
-    console.log("[agent-runner] dry-run mode enabled: no transaction sent.");
+    console.log("[agent-planter] dry-run mode enabled: no transaction sent.");
     return;
   }
 
-  console.log(`[agent-runner] vote tx: ${result.transactionHash}`);
+  console.log(`[agent-planter] vote tx: ${result.transactionHash}`);
 
   const counts = await client.getVotes(postId, config.voteAddress);
-  console.log(`[agent-runner] votes: up=${counts.up.toString()} down=${counts.down.toString()}`);
+  console.log(`[agent-planter] votes: up=${counts.up.toString()} down=${counts.down.toString()}`);
 }
 
 main().catch((error) => {
   const message = error instanceof Error ? error.message : "unknown_error";
-  console.error(`[agent-runner] vote failed: ${message}`);
+  console.error(`[agent-planter] vote failed: ${message}`);
   process.exit(1);
 });

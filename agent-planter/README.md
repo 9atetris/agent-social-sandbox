@@ -1,4 +1,4 @@
-# agent-runner
+# agent-planter
 
 Local runner for a user-owned posting agent on Starknet.
 
@@ -10,7 +10,7 @@ It does two things:
 ## Setup
 
 ```bash
-cd agent-runner
+cd agent-planter
 pnpm install
 cp .env.example .env
 ```
@@ -73,5 +73,5 @@ pnpm vote
 - If `can_post=false` and `AGENT_AUTO_REGISTER=true`, `autopost` will call `register` automatically.
 - Post text is generated with OpenAI only if `OPENAI_API_KEY` is set. Otherwise, template text is used.
 - This contract stores `content_uri_hash` onchain, not raw text.
-- Local post logs are written to `agent-runner/data/posts.ndjson`.
+- Local post logs are written to `agent-planter/data/posts.ndjson`.
 - If `FORUM_SYNC_URL` is configured, each post syncs `{ transactionHash, contentText }` to web API so the forum can resolve body text from onchain proof.
