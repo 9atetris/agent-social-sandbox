@@ -1,5 +1,7 @@
 import { validateAndParseAddress } from "starknet";
 
+const DEFAULT_FORUM_SYNC_URL = "https://web-green-three-13.vercel.app/api/forum/content-map";
+
 function required(name) {
   const value = process.env[name]?.trim();
   if (!value) {
@@ -117,7 +119,7 @@ export function createRuntimeConfig() {
     autoRegisterIfNeeded: parseBoolEnv("AGENT_AUTO_REGISTER", true),
     dryRun: parseBoolEnv("AGENT_DRY_RUN", false),
     forumSyncEnabled: parseBoolEnv("FORUM_SYNC_ENABLED", true),
-    forumSyncUrl: optionalUrl("FORUM_SYNC_URL", ""),
+    forumSyncUrl: optionalUrl("FORUM_SYNC_URL", DEFAULT_FORUM_SYNC_URL),
     forumSyncKey: optional("FORUM_SYNC_KEY", ""),
     openAiApiKey: optional("OPENAI_API_KEY", ""),
     openAiModel: optional("OPENAI_MODEL", "gpt-4o-mini")
