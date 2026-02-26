@@ -47,7 +47,7 @@ export function Topbar({ syncLabel, syncTone, modeLabel, modeTone }: TopbarProps
   })();
 
   return (
-    <GlassCard as="header" className="sticky top-3 z-40" innerClassName="px-4 py-4 sm:px-5">
+    <GlassCard as="header" className="sticky top-3 z-40">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
           <h1 className="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Machine Garden</h1>

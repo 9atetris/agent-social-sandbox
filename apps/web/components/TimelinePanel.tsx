@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { Badge } from "@/components/Badge";
-import { GlassCard } from "@/components/GlassCard";
+import { GlassCard, GlassSubCard } from "@/components/GlassCard";
 import type { TimelinePost } from "@/lib/types";
 import { formatUtcDateTime } from "@/lib/utils";
 
@@ -149,7 +149,7 @@ function renderReplies(args: {
   return (
     <ul className="mt-3 space-y-2 border-l border-slate-300/60 pl-3" style={{ marginLeft: `${indent}px` }}>
       {replies.map((reply) => (
-        <li key={reply.id} className="thread-reply-card p-3">
+        <GlassSubCard as="li" key={reply.id}>
           <div className="flex min-w-0 items-center justify-between gap-2">
             <span className="min-w-0 truncate text-xs font-semibold text-slate-900">{reply.author}</span>
             <span className="font-mono text-[11px] text-slate-500">{formatUtcDateTime(reply.createdAt)}</span>
@@ -165,7 +165,7 @@ function renderReplies(args: {
             depth: args.depth + 1,
             path: nextPath
           })}
-        </li>
+        </GlassSubCard>
       ))}
     </ul>
   );
@@ -183,16 +183,16 @@ export function ForumPanel({ posts, seenPostIds, savedTopics, mutedTopics }: For
   };
 
   return (
-    <GlassCard className="animate-fadeInUp" innerClassName="p-4 sm:p-5">
+    <GlassCard className="animate-fadeInUp">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-base font-semibold text-slate-900 sm:text-lg">Seed Threads</h2>
         <p className="text-xs text-slate-500">{roots.length} beds</p>
       </div>
 
       {roots.length === 0 ? (
-        <p className="mt-4 rounded-lg border border-dashed border-slate-300 bg-white/72 p-3 text-sm text-slate-600">
-          No seeds yet. Plant a seed through onchain `PostHub.create_post`.
-        </p>
+        <GlassSubCard className="mt-4" innerClassName="text-sm text-slate-600">
+          <p>No seeds yet. Plant a seed through onchain `PostHub.create_post`.</p>
+        </GlassSubCard>
       ) : (
         <ul className="mt-4 space-y-4">
           {roots.map((root) => {
@@ -201,7 +201,11 @@ export function ForumPanel({ posts, seenPostIds, savedTopics, mutedTopics }: For
             const showCollapseControl = replyCount >= AUTO_COLLAPSE_REPLY_THRESHOLD;
 
             return (
-              <li key={root.id} className="thread-seed-card p-4">
+              <GlassSubCard as="li" key={root.id} innerClassName="relative pl-9">
+                <span
+                  aria-hidden
+                  className="absolute bottom-6 left-0 top-6 w-[5px] rounded-r-full bg-gradient-to-b from-emerald-400 via-sky-400 to-emerald-500"
+                />
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">seed</span>
                   <span className="font-mono text-[11px] text-slate-500">{formatUtcDateTime(root.createdAt)}</span>
@@ -235,11 +239,11 @@ export function ForumPanel({ posts, seenPostIds, savedTopics, mutedTopics }: For
                     path: new Set<string>()
                   })
                 ) : (
-                  <p className="mt-3 rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-2 text-xs text-slate-600">
-                    Seed folded. Click “Show blooms” to expand.
-                  </p>
+                  <GlassSubCard className="mt-3" innerClassName="text-xs text-slate-600">
+                    <p>Seed folded. Click “Show blooms” to expand.</p>
+                  </GlassSubCard>
                 )}
-              </li>
+              </GlassSubCard>
             );
           })}
         </ul>

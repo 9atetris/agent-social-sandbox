@@ -146,41 +146,6 @@ pre,
   background-size: 3px 3px;
 }
 
-.glass-card-shell {
-  border-radius: 1.16rem;
-  padding: 1px;
-  background: linear-gradient(132deg, rgba(66, 180, 150, 0.58), rgba(82, 180, 224, 0.46), rgba(145, 217, 235, 0.48));
-  box-shadow:
-    0 18px 44px rgba(20, 62, 70, 0.14),
-    0 0 0 1px rgba(240, 255, 255, 0.34) inset;
-  transition:
-    transform 210ms ease,
-    box-shadow 240ms ease,
-    background-position 320ms ease;
-  background-size: 140% 140%;
-}
-
-.glass-card-shell:hover {
-  transform: translateY(-1px);
-  box-shadow:
-    0 20px 52px rgba(18, 64, 74, 0.17),
-    0 0 0 1px rgba(214, 255, 250, 0.58) inset,
-    0 0 26px rgba(104, 218, 220, 0.14);
-}
-
-.glass-card-inner,
-.panel-card {
-  border-radius: calc(1.16rem - 1px);
-  border: 1px solid rgba(235, 255, 249, 0.58);
-  background:
-    linear-gradient(170deg, rgba(255, 255, 255, 0.74), rgba(243, 255, 251, 0.57)),
-    radial-gradient(circle at 14% -18%, rgba(184, 248, 231, 0.34), transparent 58%);
-  backdrop-filter: blur(14px);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.74) inset,
-    0 10px 28px rgba(22, 66, 79, 0.09);
-}
-
 .garden-button {
   border-radius: 0.8rem;
   border: 1px solid transparent;
@@ -310,47 +275,6 @@ pre,
 
 .garden-badge-dot-emerald {
   background: #2f8b70;
-}
-
-.thread-seed-card {
-  position: relative;
-  border-radius: 0.95rem;
-  border: 1px solid rgba(178, 217, 224, 0.58);
-  background: rgba(255, 255, 255, 0.86);
-  box-shadow: 0 11px 24px rgba(17, 64, 71, 0.1);
-  transition:
-    transform 210ms ease,
-    box-shadow 220ms ease;
-}
-
-.thread-seed-card::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 10px;
-  bottom: 10px;
-  width: 4px;
-  border-radius: 9999px;
-  background: linear-gradient(180deg, #31bf9a, #40b8d4 52%, #9adf86);
-}
-
-.thread-seed-card:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 14px 28px rgba(21, 67, 75, 0.15),
-    0 0 0 1px rgba(162, 233, 235, 0.36) inset;
-}
-
-.thread-reply-card {
-  border-radius: 0.7rem;
-  border: 1px solid rgba(193, 220, 226, 0.64);
-  background: rgba(255, 255, 255, 0.74);
-  box-shadow: 0 7px 14px rgba(25, 66, 74, 0.08);
-  transition: box-shadow 220ms ease;
-}
-
-.thread-reply-card:hover {
-  box-shadow: 0 10px 20px rgba(22, 74, 86, 0.13);
 }
 
 @keyframes mg-orb-float {

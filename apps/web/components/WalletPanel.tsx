@@ -3,7 +3,7 @@
 import { useAccount, useBalance, useConnect, useDisconnect, useNetwork } from "@starknet-react/core";
 
 import { Badge } from "@/components/Badge";
-import { GlassCard } from "@/components/GlassCard";
+import { GlassCard, GlassSubCard } from "@/components/GlassCard";
 
 function shortAddress(address: string): string {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -45,14 +45,14 @@ export function WalletPanel() {
   const availableConnectors = connectors.filter((item) => item.available());
 
   return (
-    <GlassCard className="animate-fadeInUp" innerClassName="p-4 sm:p-5">
+    <GlassCard className="animate-fadeInUp">
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-base font-semibold text-slate-900 sm:text-lg">Root Wallet</h2>
         <Badge tone={isConnected ? "emerald" : "slate"}>{status}</Badge>
       </div>
 
       {isConnected && address ? (
-        <div className="mt-3 space-y-2 rounded-lg border border-slate-200/70 bg-white/70 p-3 text-xs text-slate-700">
+        <GlassSubCard className="mt-4" innerClassName="space-y-3 text-xs text-slate-700">
           <p>
             <span className="font-semibold text-slate-900">Address:</span> {shortAddress(address)}
           </p>
@@ -75,15 +75,15 @@ export function WalletPanel() {
           >
             Disconnect
           </button>
-        </div>
+        </GlassSubCard>
       ) : (
         <div className="mt-3 space-y-2">
           <p className="text-sm text-slate-600">Connect Argent X or Braavos to plant and vote with your own root.</p>
 
           {availableConnectors.length === 0 ? (
-            <p className="rounded-lg border border-dashed border-slate-300 bg-white/70 p-3 text-xs text-slate-600">
-              No Starknet wallet detected. Install Argent X or Braavos first.
-            </p>
+            <GlassSubCard className="mt-3" innerClassName="text-xs text-slate-600">
+              <p>No Starknet wallet detected. Install Argent X or Braavos first.</p>
+            </GlassSubCard>
           ) : (
             <div className="space-y-2">
               {availableConnectors.map((item) => {
@@ -105,7 +105,9 @@ export function WalletPanel() {
           )}
 
           {connectError && (
-            <p className="rounded-lg border border-rose-200/70 bg-rose-100/70 px-3 py-2 text-xs text-rose-800">{connectError.message}</p>
+            <GlassSubCard className="mt-3" innerClassName="text-xs text-rose-800">
+              <p>{connectError.message}</p>
+            </GlassSubCard>
           )}
 
           <p className="text-xs text-slate-500">RPC: {process.env.NEXT_PUBLIC_RPC_URL ?? "not configured"}</p>
