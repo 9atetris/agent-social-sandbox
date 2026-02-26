@@ -102,7 +102,6 @@ export function WalletPanel() {
           {connectError && (
             <p className="rounded-lg border border-rose-200/70 bg-rose-100/70 px-3 py-2 text-xs text-rose-800">{connectError.message}</p>
           )}
-          <p className="text-xs text-slate-500">RPC: {process.env.NEXT_PUBLIC_RPC_URL ?? "not configured"}</p>
         </div>
       )}
     </GlassCard>
