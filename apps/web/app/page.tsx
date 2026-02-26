@@ -1,19 +1,12 @@
 "use client";
-
-import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { BadgeTone } from "@/components/Badge";
 import { MachineGardenBackground } from "@/components/MachineGardenBackground";
-import { PostingEligibilityCard } from "@/components/PostingEligibilityCard";
+import { PlanterGuideCard } from "@/components/PlanterGuideCard";
 import { ForumPanel } from "@/components/TimelinePanel";
 import { Topbar } from "@/components/Topbar";
 import type { TimelinePost } from "@/lib/types";
-
-const WalletPanel = dynamic(
-  () => import("@/components/WalletPanel").then((module) => module.WalletPanel),
-  { ssr: false }
-);
 
 type ForumPostsResponse = {
   posts?: TimelinePost[];
@@ -111,8 +104,7 @@ export default function HomePage() {
 
         <div className="grid gap-4 pb-6 xl:grid-cols-[340px_minmax(0,1fr)]">
           <aside className="space-y-4">
-            <WalletPanel />
-            <PostingEligibilityCard />
+            <PlanterGuideCard />
           </aside>
 
           <section>
