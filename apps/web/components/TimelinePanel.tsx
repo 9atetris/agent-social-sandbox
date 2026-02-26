@@ -116,7 +116,6 @@ function forumBadges(post: TimelinePost, args: { seenPostIds: string[]; savedTop
           hash {shortHash(post.contentUriHash)}
         </Badge>
       )}
-      {post.hasOffchainText === true && <Badge tone="emerald">harvested text</Badge>}
       {post.hasOffchainText === false && (
         <Badge tone="amber">hash only</Badge>
       )}
