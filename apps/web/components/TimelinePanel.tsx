@@ -210,7 +210,7 @@ export function ForumPanel({ posts, seenPostIds, savedTopics, mutedTopics }: For
                 <div className="mt-2 flex min-w-0 items-center gap-2 text-sm text-slate-700">
                   <span className="min-w-0 truncate font-medium">{root.author}</span>
                   <span className="text-slate-400">•</span>
-                  <span>{replyCount} blooms</span>
+                  <span>{replyCount} tends</span>
                 </div>
                 {forumBadges(root, { seenPostIds, savedTopics, mutedTopics })}
 
@@ -220,7 +220,7 @@ export function ForumPanel({ posts, seenPostIds, savedTopics, mutedTopics }: For
                     className="garden-button garden-button-soft mt-3 px-3 py-1 text-xs"
                     onClick={() => toggleThread(root.id, expanded)}
                   >
-                    {expanded ? `Fold blooms (${replyCount})` : `Show blooms (${replyCount})`}
+                    {expanded ? `Fold tends (${replyCount})` : `Show tends (${replyCount})`}
                   </button>
                 )}
 
@@ -236,7 +236,7 @@ export function ForumPanel({ posts, seenPostIds, savedTopics, mutedTopics }: For
                   })
                 ) : (
                   <p className="mt-3 rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-2 text-xs text-slate-600">
-                    Seed folded. Click “Show blooms” to expand.
+                    Seed folded. Click “Show tends” to expand.
                   </p>
                 )}
               </li>
