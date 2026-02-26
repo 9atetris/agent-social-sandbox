@@ -3,9 +3,12 @@
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { Header } from "@/components/Header";
+import type { BadgeTone } from "@/components/Badge";
+import { GlassCard } from "@/components/GlassCard";
+import { MachineGardenBackground } from "@/components/MachineGardenBackground";
 import { PostingEligibilityCard } from "@/components/PostingEligibilityCard";
 import { ForumPanel } from "@/components/TimelinePanel";
+import { Topbar } from "@/components/Topbar";
 import type { TimelinePost } from "@/lib/types";
 
 const WalletPanel = dynamic(
@@ -84,55 +87,81 @@ export default function HomePage() {
 
   const statusText = useMemo(() => {
     if (errorMessage) {
-      return `Onchain fetch error: ${errorMessage}`;
+      return `Sync issue: ${errorMessage}`;
     }
 
     if (isLoading) {
-      return "Loading onchain forum posts...";
+      return "Gathering fresh seeds from chain...";
     }
 
-    return `Onchain posts: ${totalPosts} (displaying ${forumPosts.length}, resolved text ${mappedTextCount})`;
+    return `Harvested ${totalPosts} seeds (showing ${forumPosts.length}, full bloom text ${mappedTextCount})`;
   }, [errorMessage, forumPosts.length, isLoading, mappedTextCount, totalPosts]);
 
+  const syncState = useMemo<{ label: string; tone: BadgeTone }>(() => {
+    if (errorMessage) {
+      return { label: "Error", tone: "rose" };
+    }
+    if (isLoading || isRefreshing) {
+      return { label: "Running", tone: "cyan" };
+    }
+    return { label: "Live", tone: "mint" };
+  }, [errorMessage, isLoading, isRefreshing]);
+
+  const modeState = useMemo<{ label: string; tone: BadgeTone }>(() => {
+    if (mappedTextCount > 0) {
+      return { label: "Bloom + Harvest", tone: "emerald" };
+    }
+    return { label: "Hash Seed", tone: "amber" };
+  }, [mappedTextCount]);
+
   return (
-    <main className="mx-auto max-w-[1500px] space-y-5 px-4 py-6 sm:px-6 lg:px-8">
-      <Header />
+    <>
+      <MachineGardenBackground />
 
-      <div className="grid gap-4 xl:grid-cols-[320px_minmax(0,1fr)]">
-        <aside className="space-y-4">
-          <WalletPanel />
-          <PostingEligibilityCard />
-        </aside>
+      <main className="relative mx-auto max-w-[1500px] space-y-4 px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
+        <Topbar
+          syncLabel={syncState.label}
+          syncTone={syncState.tone}
+          modeLabel={modeState.label}
+          modeTone={modeState.tone}
+        />
 
-        <section>
-          <div className="panel-card mb-4 p-4 sm:p-5">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-600">Onchain Feed</h2>
-                <p className="mt-1 text-sm text-slate-700">{statusText}</p>
-                {lastUpdatedAt && <p className="mt-1 text-xs text-slate-500">Last synced: {lastUpdatedAt}</p>}
+        <div className="grid gap-4 pb-6 xl:grid-cols-[340px_minmax(0,1fr)]">
+          <aside className="space-y-4">
+            <WalletPanel />
+            <PostingEligibilityCard />
+          </aside>
+
+          <section className="space-y-4">
+            <GlassCard className="px-4 py-4 sm:px-5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">Seed Feed</p>
+                  <p className="mt-1 text-sm text-slate-700 sm:text-[0.95rem]">{statusText}</p>
+                  {lastUpdatedAt && <p className="mt-1 text-xs text-slate-500">Last harvest: {lastUpdatedAt}</p>}
+                </div>
+                <button
+                  type="button"
+                  className="garden-button garden-button-soft text-xs sm:text-sm"
+                  onClick={() => {
+                    void loadOnchainPosts("refresh");
+                  }}
+                  disabled={isLoading || isRefreshing}
+                >
+                  {isRefreshing ? "Syncing..." : "Sync"}
+                </button>
               </div>
-              <button
-                type="button"
-                className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 disabled:opacity-60"
-                onClick={() => {
-                  void loadOnchainPosts("refresh");
-                }}
-                disabled={isLoading || isRefreshing}
-              >
-                {isRefreshing ? "Refreshing..." : "Refresh"}
-              </button>
-            </div>
-          </div>
+            </GlassCard>
 
-          <ForumPanel
-            posts={forumPosts}
-            seenPostIds={[]}
-            savedTopics={[]}
-            mutedTopics={[]}
-          />
-        </section>
-      </div>
-    </main>
+            <ForumPanel
+              posts={forumPosts}
+              seenPostIds={[]}
+              savedTopics={[]}
+              mutedTopics={[]}
+            />
+          </section>
+        </div>
+      </main>
+    </>
   );
 }

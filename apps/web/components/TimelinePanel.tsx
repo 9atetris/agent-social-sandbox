@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 
+import { Badge } from "@/components/Badge";
+import { GlassCard } from "@/components/GlassCard";
 import type { TimelinePost } from "@/lib/types";
 import { formatUtcDateTime } from "@/lib/utils";
 
@@ -14,16 +16,16 @@ type ForumPanelProps = {
 
 const AUTO_COLLAPSE_REPLY_THRESHOLD = 8;
 
-function sentimentStyle(sentiment: TimelinePost["sentiment"]): string {
+function sentimentTone(sentiment: TimelinePost["sentiment"]): "emerald" | "rose" | "slate" {
   if (sentiment === "positive") {
-    return "bg-emerald-100 text-emerald-800";
+    return "emerald";
   }
 
   if (sentiment === "negative") {
-    return "bg-rose-100 text-rose-800";
+    return "rose";
   }
 
-  return "bg-slate-100 text-slate-700";
+  return "slate";
 }
 
 function byNewest(a: TimelinePost, b: TimelinePost): number {
@@ -102,19 +104,21 @@ function forumBadges(post: TimelinePost, args: { seenPostIds: string[]; savedTop
 
   return (
     <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-      <span className={`rounded-full px-2 py-1 ${sentimentStyle(post.sentiment)}`}>{post.sentiment}</span>
-      <span className="rounded-full bg-cyan-100 px-2 py-1 text-cyan-800">{post.topic}</span>
-      <span className="rounded-full bg-slate-100 px-2 py-1 text-slate-700">score {post.engagementScore}</span>
-      {tracked && <span className="rounded-full bg-teal-100 px-2 py-1 text-teal-800">tracked</span>}
-      {muted && <span className="rounded-full bg-amber-100 px-2 py-1 text-amber-800">muted</span>}
-      {seen && <span className="rounded-full bg-slate-200 px-2 py-1 text-slate-700">seen</span>}
-      {post.postId && <span className="rounded-full bg-indigo-100 px-2 py-1 text-indigo-800">post #{post.postId}</span>}
+      <Badge tone={sentimentTone(post.sentiment)}>{post.sentiment}</Badge>
+      <Badge tone="cyan">{post.topic}</Badge>
+      <Badge tone="slate">score {post.engagementScore}</Badge>
+      {tracked && <Badge tone="mint">tracked</Badge>}
+      {muted && <Badge tone="amber">muted</Badge>}
+      {seen && <Badge tone="slate">seen</Badge>}
+      {post.postId && <Badge tone="cyan">seed #{post.postId}</Badge>}
       {post.contentUriHash && (
-        <span className="rounded-full bg-slate-200 px-2 py-1 font-mono text-slate-700">hash {shortHash(post.contentUriHash)}</span>
+        <Badge tone="slate" className="font-mono">
+          hash {shortHash(post.contentUriHash)}
+        </Badge>
       )}
-      {post.hasOffchainText === true && <span className="rounded-full bg-emerald-100 px-2 py-1 text-emerald-800">text resolved</span>}
+      {post.hasOffchainText === true && <Badge tone="emerald">harvested text</Badge>}
       {post.hasOffchainText === false && (
-        <span className="rounded-full bg-amber-100 px-2 py-1 text-amber-800">hash only</span>
+        <Badge tone="amber">hash only</Badge>
       )}
     </div>
   );
@@ -143,9 +147,9 @@ function renderReplies(args: {
   const indent = clampThreadIndent(args.depth) * 12;
 
   return (
-    <ul className="mt-3 space-y-2 border-l-2 border-slate-200 pl-3" style={{ marginLeft: `${indent}px` }}>
+    <ul className="mt-3 space-y-2 border-l border-slate-300/60 pl-3" style={{ marginLeft: `${indent}px` }}>
       {replies.map((reply) => (
-        <li key={reply.id} className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+        <li key={reply.id} className="rounded-lg border border-slate-200/70 bg-white/72 p-3 shadow-sm shadow-slate-800/5">
           <div className="flex min-w-0 items-center justify-between gap-2">
             <span className="min-w-0 truncate text-xs font-semibold text-slate-900">{reply.author}</span>
             <span className="font-mono text-[11px] text-slate-500">{formatUtcDateTime(reply.createdAt)}</span>
@@ -179,15 +183,15 @@ export function ForumPanel({ posts, seenPostIds, savedTopics, mutedTopics }: For
   };
 
   return (
-    <section className="panel-card animate-fadeInUp p-4 sm:p-5">
+    <GlassCard className="animate-fadeInUp p-4 sm:p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-lg font-semibold text-slate-900">Forum</h2>
-        <p className="text-xs text-slate-500">{roots.length} threads</p>
+        <h2 className="text-base font-semibold text-slate-900 sm:text-lg">Seed Threads</h2>
+        <p className="text-xs text-slate-500">{roots.length} beds</p>
       </div>
 
       {roots.length === 0 ? (
-        <p className="mt-4 rounded-lg border border-dashed border-slate-300 bg-white p-3 text-sm text-slate-600">
-          No threads yet. Create one through onchain `PostHub.create_post`.
+        <p className="mt-4 rounded-lg border border-dashed border-slate-300 bg-white/72 p-3 text-sm text-slate-600">
+          No seeds yet. Plant a seed through onchain `PostHub.create_post`.
         </p>
       ) : (
         <ul className="mt-4 space-y-4">
@@ -197,26 +201,26 @@ export function ForumPanel({ posts, seenPostIds, savedTopics, mutedTopics }: For
             const showCollapseControl = replyCount >= AUTO_COLLAPSE_REPLY_THRESHOLD;
 
             return (
-              <li key={root.id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+              <li key={root.id} className="rounded-xl border border-slate-200/70 bg-white/76 p-4 shadow-sm shadow-slate-900/10">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">thread</span>
+                  <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">seed</span>
                   <span className="font-mono text-[11px] text-slate-500">{formatUtcDateTime(root.createdAt)}</span>
                 </div>
                 <p className="mt-2 whitespace-pre-wrap break-words text-base font-semibold text-slate-900">{root.text}</p>
                 <div className="mt-2 flex min-w-0 items-center gap-2 text-sm text-slate-700">
                   <span className="min-w-0 truncate font-medium">{root.author}</span>
                   <span className="text-slate-400">•</span>
-                  <span>{replyCount} comments</span>
+                  <span>{replyCount} blooms</span>
                 </div>
                 {forumBadges(root, { seenPostIds, savedTopics, mutedTopics })}
 
                 {showCollapseControl && (
                   <button
                     type="button"
-                    className="mt-3 rounded-md border border-slate-300 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                    className="garden-button garden-button-soft mt-3 px-3 py-1 text-xs"
                     onClick={() => toggleThread(root.id, expanded)}
                   >
-                    {expanded ? `Hide comments (${replyCount})` : `Show comments (${replyCount})`}
+                    {expanded ? `Fold blooms (${replyCount})` : `Show blooms (${replyCount})`}
                   </button>
                 )}
 
@@ -231,8 +235,8 @@ export function ForumPanel({ posts, seenPostIds, savedTopics, mutedTopics }: For
                     path: new Set<string>()
                   })
                 ) : (
-                  <p className="mt-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
-                    Thread collapsed. Click “Show comments” to expand.
+                  <p className="mt-3 rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-2 text-xs text-slate-600">
+                    Seed folded. Click “Show blooms” to expand.
                   </p>
                 )}
               </li>
@@ -240,6 +244,6 @@ export function ForumPanel({ posts, seenPostIds, savedTopics, mutedTopics }: For
           })}
         </ul>
       )}
-    </section>
+    </GlassCard>
   );
 }

@@ -2,6 +2,9 @@
 
 import { useAccount, useReadContract } from "@starknet-react/core";
 
+import { Badge } from "@/components/Badge";
+import { GlassCard } from "@/components/GlassCard";
+
 type HexAddress = `0x${string}`;
 
 const AGENT_REGISTRY_ADDRESS = process.env.NEXT_PUBLIC_AGENT_REGISTRY_ADDRESS as HexAddress | undefined;
@@ -78,38 +81,47 @@ export function PostingEligibilityCard() {
   const registered = parseRegisteredFlag(data);
 
   let statusText = "Connect wallet to verify posting permission.";
-  let statusStyle = "border-slate-200 bg-slate-50 text-slate-700";
+  let statusStyle = "border-slate-300/70 bg-white/65 text-slate-700";
+  let statusTone: "slate" | "amber" | "rose" | "emerald" | "cyan" = "slate";
 
   if (!AGENT_REGISTRY_ADDRESS) {
-    statusText = "NEXT_PUBLIC_AGENT_REGISTRY_ADDRESS is not configured.";
-    statusStyle = "border-amber-200 bg-amber-50 text-amber-800";
+    statusText = "NEXT_PUBLIC_AGENT_REGISTRY_ADDRESS is missing.";
+    statusStyle = "border-amber-200/70 bg-amber-100/60 text-amber-800";
+    statusTone = "amber";
   } else if (isLoading || isFetching) {
-    statusText = "Checking AgentRegistry posting status...";
-    statusStyle = "border-slate-200 bg-slate-50 text-slate-700";
+    statusText = "Checking bloom status from AgentRegistry...";
+    statusStyle = "border-cyan-200/70 bg-cyan-100/55 text-cyan-800";
+    statusTone = "cyan";
   } else if (error) {
-    statusText = "Could not verify posting status from chain.";
-    statusStyle = "border-rose-200 bg-rose-50 text-rose-800";
+    statusText = "Could not verify bloom status from chain.";
+    statusStyle = "border-rose-200/70 bg-rose-100/60 text-rose-800";
+    statusTone = "rose";
   } else if (isConnected && registered === true) {
-    statusText = "Registered address: PostHub.create_post is allowed.";
-    statusStyle = "border-emerald-200 bg-emerald-50 text-emerald-800";
+    statusText = "Bloom ready: this root can plant a seed onchain.";
+    statusStyle = "border-emerald-200/70 bg-emerald-100/65 text-emerald-800";
+    statusTone = "emerald";
   } else if (isConnected && registered === false) {
-    statusText = "Not registered: create_post will revert with AGENT_NOT_REGISTERED.";
-    statusStyle = "border-rose-200 bg-rose-50 text-rose-800";
+    statusText = "Dormant root: planting a seed reverts with AGENT_NOT_REGISTERED.";
+    statusStyle = "border-rose-200/70 bg-rose-100/65 text-rose-800";
+    statusTone = "rose";
   }
 
   return (
-    <section className="panel-card animate-fadeInUp p-4 sm:p-5">
-      <h2 className="text-lg font-semibold text-slate-900">Posting Eligibility</h2>
+    <GlassCard className="animate-fadeInUp p-4 sm:p-5">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-base font-semibold text-slate-900 sm:text-lg">Bloom Eligibility</h2>
+        <Badge tone={statusTone}>{statusTone === "emerald" ? "Blooming" : statusTone === "rose" ? "Dormant" : "Checking"}</Badge>
+      </div>
       <p className="mt-2 text-sm text-slate-600">
-        Write path is onchain only: <span className="font-semibold text-slate-900">PostHub.create_post</span>.
+        Planting a seed writes to <span className="font-semibold text-slate-900">PostHub.create_post</span>.
       </p>
 
       <div className={`mt-3 rounded-lg border px-3 py-2 text-sm ${statusStyle}`}>{statusText}</div>
 
-      <ul className="mt-3 space-y-1 text-xs text-slate-700">
-        <li>Unregistered addresses are blocked by contract-level check.</li>
-        <li>Offchain bridge writes are disabled by default.</li>
+      <ul className="mt-3 space-y-1 text-xs text-slate-700 sm:text-[0.78rem]">
+        <li>Only registered roots can bloom.</li>
+        <li>Bridge write path is disabled by default.</li>
       </ul>
-    </section>
+    </GlassCard>
   );
 }
