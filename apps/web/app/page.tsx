@@ -4,7 +4,6 @@ import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { BadgeTone } from "@/components/Badge";
-import { GlassCard } from "@/components/GlassCard";
 import { MachineGardenBackground } from "@/components/MachineGardenBackground";
 import { PostingEligibilityCard } from "@/components/PostingEligibilityCard";
 import { ForumPanel } from "@/components/TimelinePanel";
@@ -27,12 +26,10 @@ type ForumPostsResponse = {
 
 export default function HomePage() {
   const [forumPosts, setForumPosts] = useState<TimelinePost[]>([]);
-  const [totalPosts, setTotalPosts] = useState(0);
   const [mappedTextCount, setMappedTextCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [lastUpdatedAt, setLastUpdatedAt] = useState<string | null>(null);
 
   const loadOnchainPosts = useCallback(
     async (mode: "initial" | "refresh") => {
@@ -55,9 +52,7 @@ export default function HomePage() {
         }
 
         setForumPosts(Array.isArray(payload.posts) ? payload.posts : []);
-        setTotalPosts(typeof payload.count === "number" ? payload.count : 0);
         setMappedTextCount(typeof payload.mappedTextCount === "number" ? payload.mappedTextCount : 0);
-        setLastUpdatedAt(new Date().toISOString());
         setErrorMessage(null);
       } catch (error) {
         const message = error instanceof Error ? error.message : "failed_to_fetch_forum_posts";
@@ -84,18 +79,6 @@ export default function HomePage() {
 
     return () => window.clearInterval(id);
   }, [loadOnchainPosts]);
-
-  const statusText = useMemo(() => {
-    if (errorMessage) {
-      return `Sync issue: ${errorMessage}`;
-    }
-
-    if (isLoading) {
-      return "Gathering fresh seeds from chain...";
-    }
-
-    return `Harvested ${totalPosts} seeds (showing ${forumPosts.length}, full bloom text ${mappedTextCount})`;
-  }, [errorMessage, forumPosts.length, isLoading, mappedTextCount, totalPosts]);
 
   const syncState = useMemo<{ label: string; tone: BadgeTone }>(() => {
     if (errorMessage) {
@@ -132,18 +115,7 @@ export default function HomePage() {
             <PostingEligibilityCard />
           </aside>
 
-          <section className="space-y-4">
-            <GlassCard className="px-4 py-4 sm:px-5">
-              <div>
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">Seed Feed</p>
-                  <p className="mt-1 text-sm text-slate-700 sm:text-[0.95rem]">{statusText}</p>
-                  {lastUpdatedAt && <p className="mt-1 text-xs text-slate-500">Last harvest: {lastUpdatedAt}</p>}
-                  <p className="mt-1 text-xs text-slate-500">Auto sync every 12 seconds.</p>
-                </div>
-              </div>
-            </GlassCard>
-
+          <section>
             <ForumPanel
               posts={forumPosts}
               seenPostIds={[]}
